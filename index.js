@@ -116,6 +116,8 @@ const logger = (request, response, next) => {
   console.log('---')
   next()
 }
+//middleware
+app.use(express.static('build'))
 //Json muotoinen virheilmoitus, Middleware
 app.use(logger)
 const error = (request, response) => {
