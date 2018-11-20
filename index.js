@@ -49,10 +49,10 @@ console.log(`Server running on port ${port}`)
 /*app.get('/', (req, res) => {
     res.send('<h1>Hello World!</h1>')
   })*/
-  app.get('/notes', (req, res) => {
+  app.get('/api/notes', (req, res) => {
     res.json(notes)
   })
-  app.get('/notes/:id', (request, response) => {
+  app.get('/api/notes/:id', (request, response) => {
     const id = Number(request.params.id)
     const note = notes.find(note => note.id === id)
   
@@ -63,7 +63,7 @@ console.log(`Server running on port ${port}`)
     }
   })
 
-    app.delete('/notes/:id', (request, response) => {
+    app.delete('/api/notes/:id', (request, response) => {
         const id = Number(request.params.id)
         notes = notes.filter(note => note.id !== id)
       
@@ -80,7 +80,7 @@ console.log(`Server running on port ${port}`)
     const maxId = notes.length > 0 ? notes.map(n => n.id).sort((a,b) => a - b).reverse()[0] : 1
     return maxId + 1
   }
-  app.post('/notes', (request, response) => {
+  app.post('/api/notes', (request, response) => {
     /*const maxId = notes.length > 0 ? notes.map(n => n.id).sort((a,b) => a - b).reverse()[0] : 1
     //testaukseen esim postmanilla
     const note = request.body
