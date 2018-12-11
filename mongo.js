@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-const url = 'mongodb://pizza:pizza123@ds163034.mlab.com:63034/pizza'
+const url = ''
 
 mongoose.connect(url)
 mongoose.Promise = global.Promise

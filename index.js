@@ -33,15 +33,12 @@ let pizzat = [
     return {
       content: pizza.content,
       date: pizza.date,
-      //important: pizza.important,
       id: pizza._id
     }
   }
 
   //hakemista vastaavat käsittelijät
   app.get('/api/pizzat', (request, response) => {
-   //ei mongo
-   // res.json(notes)
    //mongo
    Pizza
     .find({})
@@ -57,7 +54,7 @@ let pizzat = [
     })
 
   })
-
+  //delete
     app.delete('/api/pizzat/:id', (request, response) => {
    
       Pizza
