@@ -1,22 +1,13 @@
-
-//ottaa käyttöön webpalvelimen
-//const http = require('http')
-//luo palvelimen metodilla + rekisteröi tapahtumakäsittelijän
-//const app = http.createServer((req, res) => {
-  //res.writeHead(200, { 'Content-Type': 'text/plain' })
-  //res.end('Hello World')
-//})
-//kuuntelee porttiin 3001 tulevia http pyyntöjä
-
 const express = require('express')
 const app = express()
 //post 
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 const cors = require('cors')
-
+//const loginRouter = require('./controllers/login')
 app.use(cors())
-let notes = [
+const Pizza = require('./models/pizza')
+let pizzat = [
     {
       id: 1,
       content: 'Kinkkupizza',
@@ -37,75 +28,89 @@ let notes = [
     }
   ]
   
- /* const app = http.createServer((request, response) => {
-    response.writeHead(200, { 'Content-Type': 'application/json' })
-    response.end(JSON.stringify(notes))
-  })
-
-  const port = 3001
-app.listen(port)
-console.log(`Server running on port ${port}`)
-*/
-/*app.get('/', (req, res) => {
-    res.send('<h1>Hello World!</h1>')
-  })*/
-  app.get('/api/notes', (req, res) => {
-    res.json(notes)
-  })
-  app.get('/api/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const note = notes.find(note => note.id === id)
-  
-    if ( note ) {
-      response.json(note)
-    } else {
-      response.status(404).end()
+//formatointia
+  const formatPizza = (pizza) => {
+    return {
+      content: pizza.content,
+      date: pizza.date,
+      important: pizza.important,
+      id: pizza._id
     }
+  }
+
+  //hakemista vastaavat käsittelijät
+  app.get('/api/pizzat', (request, response) => {
+   //mongo
+   Pizza
+    .find({})
+    .then(pizzat => {
+      response.json(pizzat.map(formatPizza))
+    })
   })
+  app.get('/api/pizzat/:id', (request, response) => {
+      Pizza
+      .findById(request.params.id)
+      .then(pizza => {
+        response.json(formatPizza(pizza))
+    })
 
-    app.delete('/api/notes/:id', (request, response) => {
-        const id = Number(request.params.id)
-        notes = notes.filter(note => note.id !== id)
-      
-        response.status(204).end()
+  })
+//delete
+    app.delete('/api/pizzat/:id', (request, response) => {
+      Pizza
+    .findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => {
+      response.status(400).send({ error: 'malformatted id' })
+    })
+})
+
+  //update
+  app.put('/api/pizzat/:id', (request, response) => {
+    const body = request.body
+  
+    const pizza = {
+      content: body.content,
+      important: body.important
+    }
+  
+    Pizza
+      .findByIdAndUpdate(request.params.id, pizza, { new: true } )
+      .then(updatedPizza => {
+        response.json(formatPizza(updatedPizza))
       })
-  //http get pyyntö note/jotain
-
-  /*const generateId = () => {
-    const maxId = notes.length > 0 ? notes.map(n => n.id).sort((a,b) => a - b).reverse()[0] : 1
-    return maxId + 1
-  }*/
-
+      .catch(error => {
+        console.log(error)
+        response.status(400).send({ error: 'malformatted id' })
+      })
+  })
+  //id
   const generateId = () => {
-    const maxId = notes.length > 0 ? notes.map(n => n.id).sort((a,b) => a - b).reverse()[0] : 1
+    const maxId = pizzat.length > 0 ? pizzat.map(n => n.id).sort((a,b) => a - b).reverse()[0] : 1
     return maxId + 1
   }
-  app.post('/api/notes', (request, response) => {
-    /*const maxId = notes.length > 0 ? notes.map(n => n.id).sort((a,b) => a - b).reverse()[0] : 1
-    //testaukseen esim postmanilla
-    const note = request.body
-    //console.log(note)
-    note.id = maxId + 1
-
-    notes = notes.concat(note)
-  
-    response.json(note)*/
+  //post
+  app.post('/api/pizzat', (request, response) => {
+   
     const body = request.body
 
   if (body.content === undefined) {
     return response.status(400).json({error: 'content missing'})
   }
 
-  const note = {
-    content: body.content,
-    important: body.important|| false,
-    date: new Date(),
-    id: generateId()
-  }
+const pizza = new Pizza({
+  content: body.content,
+  important: body.important || false,
+  date: new Date()
+})
 
-  notes = notes.concat(note)
-
-  response.json(note)
+pizza
+  .save()
+  .then(savedPizza => {
+    response.json(formatPizza(savedPizza))
+  })
 })
 
 //middleware
@@ -125,11 +130,14 @@ const error = (request, response) => {
 }
 
 app.use(error)
- // })
-
   //const PORT = 3001
   //herokuun
   const PORT = process.env.PORT || 3001
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
+
+  //app.use('/api/login', loginRouter)
+
+
+
