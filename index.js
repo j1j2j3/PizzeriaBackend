@@ -4,7 +4,7 @@ const app = express()
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 const cors = require('cors')
-//const loginRouter = require('./controllers/login')
+
 app.use(cors())
 const Pizza = require('./models/pizza')
 let pizzat = [
@@ -27,19 +27,21 @@ let pizzat = [
       important: true
     }
   ]
-  
+
 //formatointia
   const formatPizza = (pizza) => {
     return {
       content: pizza.content,
       date: pizza.date,
-      important: pizza.important,
+      //important: pizza.important,
       id: pizza._id
     }
   }
 
   //hakemista vastaavat käsittelijät
   app.get('/api/pizzat', (request, response) => {
+   //ei mongo
+   // res.json(notes)
    //mongo
    Pizza
     .find({})
@@ -55,8 +57,9 @@ let pizzat = [
     })
 
   })
-//delete
+
     app.delete('/api/pizzat/:id', (request, response) => {
+   
       Pizza
     .findByIdAndRemove(request.params.id)
     .then(result => {
@@ -66,14 +69,12 @@ let pizzat = [
       response.status(400).send({ error: 'malformatted id' })
     })
 })
-
   //update
   app.put('/api/pizzat/:id', (request, response) => {
     const body = request.body
   
     const pizza = {
       content: body.content,
-      important: body.important
     }
   
     Pizza
@@ -86,14 +87,11 @@ let pizzat = [
         response.status(400).send({ error: 'malformatted id' })
       })
   })
-  //id
   const generateId = () => {
     const maxId = pizzat.length > 0 ? pizzat.map(n => n.id).sort((a,b) => a - b).reverse()[0] : 1
     return maxId + 1
   }
-  //post
   app.post('/api/pizzat', (request, response) => {
-   
     const body = request.body
 
   if (body.content === undefined) {
@@ -102,7 +100,6 @@ let pizzat = [
 
 const pizza = new Pizza({
   content: body.content,
-  important: body.important || false,
   date: new Date()
 })
 
@@ -130,14 +127,12 @@ const error = (request, response) => {
 }
 
 app.use(error)
+ // })
+
   //const PORT = 3001
   //herokuun
   const PORT = process.env.PORT || 3001
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
-
-  //app.use('/api/login', loginRouter)
-
-
 
